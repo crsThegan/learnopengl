@@ -1,5 +1,4 @@
 # Learning OpenGL
-----
 This is my implementation of a basic renderer, built while reading LearnOpenGL's 'Getting Started' chapter.
 
 It requires following dependencies:
@@ -7,6 +6,7 @@ It requires following dependencies:
 * GLAD
 * GLFW
 * stb/stb_image.h
+Ensure that they are added in the *include* directory.
 
 To build, use the following commands *once* in the root directory of the cloned repo:
 ```bash
