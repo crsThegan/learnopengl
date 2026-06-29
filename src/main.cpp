@@ -139,6 +139,11 @@ int main() {
         glClearColor(.2f, .3f, .3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        float time = glfwGetTime();
+        glm::vec3 curLightPos = lightPos;
+        curLightPos.x = cos(time) * lightPos.x;
+        curLightPos.y = sin(time) * lightPos.y;
+
         glm::mat4 model = glm::translate(glm::mat4(1.0f), containerPos);
         model = glm::rotate(model, glm::radians(30.0f),
                             glm::vec3(1.0f, 1.0f, 1.0f));
@@ -155,8 +160,7 @@ int main() {
         shader.setVec3("lightColor", 1.0f, 1.0f, 1.0f);
         shader.setVec3("objectColor", 1.0f, 0.5f, 0.31f);
 
-        shader.setVec3("lightPos", lightPos);
-        shader.setVec3("viewPos", camera.getPos());
+        shader.setVec3("lightPos", view * glm::vec4(curLightPos, 1.0f));
 
         glBindVertexArray(vao);
 
@@ -164,7 +168,7 @@ int main() {
 
         lightShader.use();
 
-        model = glm::translate(glm::mat4(1.0f), lightPos);
+        model = glm::translate(glm::mat4(1.0f), curLightPos);
         model = glm::scale(model, glm::vec3(0.2f));
 
         lightShader.setMat4("model", model);

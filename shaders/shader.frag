@@ -8,7 +8,6 @@ uniform vec3 lightColor;
 uniform vec3 objectColor;
 
 uniform vec3 lightPos;
-uniform vec3 viewPos;
 
 void main() {
 	float ambientFactor = 0.1;
@@ -22,7 +21,7 @@ void main() {
 
 	float specularFactor = 0.5;
 
-	vec3 viewDir = normalize(viewPos - fragPos);
+	vec3 viewDir = normalize(-fragPos);
 	vec3 reflectDir = reflect(-lightDir, norm);
 
 	float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);
