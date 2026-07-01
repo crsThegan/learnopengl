@@ -122,7 +122,7 @@ int main() {
                           (void *)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
 
-    Shader shader("../shaders/shader.vert", "../shaders/shader.frag");
+    Shader shader("../shaders/shader.vert", "../shaders/blinn_phong.frag");
     Shader lightShader("../shaders/shader.vert",
                        "../shaders/light_source.frag");
 
