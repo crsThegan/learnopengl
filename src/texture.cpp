@@ -4,7 +4,7 @@
 #include <stb/stb_image.h>
 #include <iostream>
 
-Texture2D::Texture2D(const char *path, GLenum src_chan) {
+Texture2D::Texture2D(const char *path) {
     glGenTextures(1, &id);
     glBindTexture(GL_TEXTURE_2D, id);
 
@@ -19,7 +19,20 @@ Texture2D::Texture2D(const char *path, GLenum src_chan) {
     int width, height, nrChannels;
     unsigned char *data = stbi_load(path, &width, &height, &nrChannels, 0);
     if (data) {
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, src_chan,
+        GLenum chan;
+        switch (nrChannels) {
+        case 1:
+            chan = GL_RED;
+            break;
+        case 3:
+            chan = GL_RGB;
+            break;
+        case 4:
+            chan = GL_RGBA;
+            break;
+        }
+
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, chan,
                      GL_UNSIGNED_BYTE, data);
         glGenerateMipmap(GL_TEXTURE_2D);
     } else {
