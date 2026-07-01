@@ -8,6 +8,7 @@ in vec2 texCoord;
 struct Material {
 	sampler2D diffuse;
 	sampler2D specular;
+	sampler2D emission;
 
 	float shininess;
 };
@@ -23,19 +24,12 @@ struct Light {
 uniform Light light;
 uniform Material material;
 
-uniform sampler2D emission;
-
-vec3 invert(vec3 tex) {
-	if (tex == vec3(0.0)) {
-		return vec3(1.0);
-	} else {
-		return vec3(0.0);
-	}
-}
-
 void main() {
 	vec3 texDiff = vec3(texture(material.diffuse, texCoord));
 	vec3 texSpec = vec3(texture(material.specular, texCoord));
+
+	float woodMask = 1.0 - step(0.01, length(texSpec));
+	vec3 emission = vec3(texture(material.emission, texCoord)) * woodMask;
 
 	vec3 ambient = texDiff * light.ambient;
 
@@ -52,7 +46,6 @@ void main() {
 	vec3 specular = texSpec * spec
 		* light.specular;
 
-	vec3 res = mix(ambient + diffuse + specular,
-			vec3(texture(emission, texCoord)) * invert(texSpec), 0.5);
+	vec3 res = ambient + diffuse + specular + emission;
 	fragColor = vec4(res, 1.0);
 }

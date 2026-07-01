@@ -157,7 +157,7 @@ int main() {
     shader.setInt("material.specular", 1);
     shader.setFloat("material.shininess", 256);
 
-    shader.setInt("emission", 2);
+    shader.setInt("material.emission", 2);
 
     lightShader.use();
     lightShader.setVec3("color", lightColor);
