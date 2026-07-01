@@ -12,6 +12,8 @@ add_executable(OpenGLTest
 	src/shader.cpp
 	src/texture.cpp
 	src/camera.cpp
+	src/materials/gold.cpp
+	src/materials/pearl.cpp
 	src/stb_image.cpp
     src_glad/glad.c
 )

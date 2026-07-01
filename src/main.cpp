@@ -10,6 +10,7 @@
 
 #include "shader.h"
 #include "camera.h"
+#include "material.h"
 
 Camera camera(0.0f, 0.0f, 3.0f);
 float deltaTime = 0.0f, lastFrame = 0.0f;
@@ -122,9 +123,26 @@ int main() {
                           (void *)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
 
-    Shader shader("../shaders/shader.vert", "../shaders/blinn_phong.frag");
-    Shader lightShader("../shaders/shader.vert",
-                       "../shaders/light_source.frag");
+    Shader shader("../src/shaders/shader.vert",
+                  "../src/shaders/blinn_phong.frag");
+    Shader lightShader("../src/shaders/shader.vert",
+                       "../src/shaders/light_source.frag");
+
+    shader.use();
+    glm::vec3 lightColor(1.0f);
+    Material pearl = Material::getPearl();
+
+    shader.setVec3("light.ambient", lightColor);
+    shader.setVec3("light.diffuse", lightColor);
+    shader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
+
+    shader.setVec3("material.ambient", pearl.ambient);
+    shader.setVec3("material.diffuse", pearl.diffuse);
+    shader.setVec3("material.specular", pearl.specular);
+    shader.setFloat("material.shininess", pearl.shininess * 512);
+
+    lightShader.use();
+    lightShader.setVec3("color", lightColor);
 
     glEnable(GL_DEPTH_TEST);
 
@@ -157,10 +175,7 @@ int main() {
                                           800.0f / 600.0f, 0.1f, 100.0f);
         shader.setMat4("proj", proj);
 
-        shader.setVec3("lightColor", 1.0f, 1.0f, 1.0f);
-        shader.setVec3("objectColor", 1.0f, 0.5f, 0.31f);
-
-        shader.setVec3("lightPos", view * glm::vec4(curLightPos, 1.0f));
+        shader.setVec3("light.pos", view * glm::vec4(curLightPos, 1.0f));
 
         glBindVertexArray(vao);
 
@@ -174,6 +189,8 @@ int main() {
         lightShader.setMat4("model", model);
         lightShader.setMat4("view", view);
         lightShader.setMat4("proj", proj);
+
+        lightShader.setVec3("color", lightColor);
 
         glBindVertexArray(lightVao);
 
