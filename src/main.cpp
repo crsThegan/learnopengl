@@ -8,6 +8,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include "glm/detail/func_trigonometric.hpp"
 #include "shader.h"
 #include "camera.h"
 #include "texture.h"
@@ -96,6 +97,19 @@ int main() {
     -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 0.0f,
     -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f
 	};
+	
+	glm::vec3 cubePositions[] = {
+       glm::vec3( 0.0f,  0.0f,  0.0f), 
+       glm::vec3( 2.0f,  5.0f, -15.0f), 
+       glm::vec3(-1.5f, -2.2f, -2.5f),  
+       glm::vec3(-3.8f, -2.0f, -12.3f),  
+       glm::vec3( 2.4f, -0.4f, -3.5f),  
+       glm::vec3(-1.7f,  3.0f, -7.5f),  
+       glm::vec3( 1.3f, -2.0f, -2.5f),  
+       glm::vec3( 1.5f,  2.0f, -2.5f), 
+       glm::vec3( 1.5f,  0.2f, -1.5f), 
+       glm::vec3(-1.3f,  1.0f, -1.5f)  
+	};
     // clang-format on
 
     unsigned int lightVao, vbo;
@@ -135,7 +149,6 @@ int main() {
 
     Texture2D tex_box("../textures/bordered_box.png");
     Texture2D tex_box_spec("../textures/bordered_box_specular.png");
-    Texture2D tex_matrix("../textures/matrix.jpg");
 
     glActiveTexture(GL_TEXTURE0);
     tex_box.use();
@@ -143,21 +156,19 @@ int main() {
     glActiveTexture(GL_TEXTURE1);
     tex_box_spec.use();
 
-    glActiveTexture(GL_TEXTURE2);
-    tex_matrix.use();
-
     shader.use();
     glm::vec3 lightColor(1.0f);
 
     shader.setVec3("light.ambient", lightColor * glm::vec3(0.2f));
     shader.setVec3("light.diffuse", lightColor * glm::vec3(0.5f));
     shader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
+    shader.setFloat("light.constant", 1.0f);
+    shader.setFloat("light.linear", 0.09f);
+    shader.setFloat("light.quadratic", 0.032f);
 
     shader.setInt("material.diffuse", 0);
     shader.setInt("material.specular", 1);
     shader.setFloat("material.shininess", 256);
-
-    shader.setInt("material.emission", 2);
 
     lightShader.use();
     lightShader.setVec3("color", lightColor);
@@ -176,9 +187,9 @@ int main() {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         float time = glfwGetTime();
-        glm::vec3 curLightPos = lightPos;
-        curLightPos.x = cos(time) * lightPos.x;
-        curLightPos.y = sin(time) * lightPos.y;
+        // glm::vec3 curLightPos = lightPos;
+        // curLightPos.x = cos(time) * lightPos.x;
+        // curLightPos.y = sin(time) * lightPos.y;
 
         glm::mat4 model = glm::translate(glm::mat4(1.0f), containerPos);
         model = glm::rotate(model, glm::radians(30.0f),
@@ -193,26 +204,40 @@ int main() {
                                           800.0f / 600.0f, 0.1f, 100.0f);
         shader.setMat4("proj", proj);
 
-        shader.setVec3("light.pos", view * glm::vec4(curLightPos, 1.0f));
+        shader.setVec3("light.pos", 0.0f, 0.0f, 0.0f);
+        shader.setVec3("light.dir", 0.0f, 0.0f, -1.0f);
+        shader.setFloat("light.cutoff", glm::cos(glm::radians(12.5f)));
+        shader.setFloat("light.outerCutoff", glm::cos(glm::radians(17.5f)));
 
         glBindVertexArray(vao);
 
-        glDrawArrays(GL_TRIANGLES, 0, 36);
+        for (unsigned int i = 0; i < 10; i++) {
+            glm::mat4 model = glm::mat4(1.0f);
+            model = glm::translate(model, cubePositions[i]);
+            float angle = 20.0f * i;
+            model = glm::rotate(model, glm::radians(angle),
+                                glm::vec3(1.0f, 0.3f, 0.5f));
+            shader.setMat4("model", model);
 
-        lightShader.use();
+            glDrawArrays(GL_TRIANGLES, 0, 36);
+        }
 
-        model = glm::translate(glm::mat4(1.0f), curLightPos);
-        model = glm::scale(model, glm::vec3(0.2f));
+        /*
+lightShader.use();
 
-        lightShader.setMat4("model", model);
-        lightShader.setMat4("view", view);
-        lightShader.setMat4("proj", proj);
+model = glm::translate(glm::mat4(1.0f), lightPos);
+model = glm::scale(model, glm::vec3(0.2f));
 
-        lightShader.setVec3("color", lightColor);
+lightShader.setMat4("model", model);
+lightShader.setMat4("view", view);
+lightShader.setMat4("proj", proj);
 
-        glBindVertexArray(lightVao);
+lightShader.setVec3("color", lightColor);
 
-        glDrawArrays(GL_TRIANGLES, 0, 36);
+glBindVertexArray(lightVao);
+
+glDrawArrays(GL_TRIANGLES, 0, 36);
+        */
 
         glfwSwapBuffers(window);
         glfwPollEvents();
